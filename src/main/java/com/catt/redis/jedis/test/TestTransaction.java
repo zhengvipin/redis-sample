@@ -9,36 +9,39 @@ import java.util.List;
  * @author zwp
  * @since 2019-12-29 13:19
  */
-public class TestTx {
+public class TestTransaction {
     public boolean transMethod() throws InterruptedException {
         Jedis jedis = new Jedis("192.168.211.211", 6379);
 
-        System.out.println("********************init*******************");
+        System.out.println("********************数据初始化*******************");
         jedis.set("balance", "100");
         jedis.set("debt", "0");
-        System.out.println("init finish.");
+        System.out.println("初始化完成.");
 
-        int balance;// 可用余额
-        int debt;// 欠额
-        int amtToSubtract = 10;// 实刷额度
+        // 可用余额
+        int balance;
+        // 欠额
+        int debt;
+        // 实刷额度
+        int cost = 10;
 
         jedis.watch("balance");
 
-        System.out.println("********************internet delay*******************");
+        System.out.println("********************网络延迟*******************");
         Thread.sleep(7000);
-        // 模拟加塞：在redis客户端运行：set balance 5
-        System.out.println("internet ok.");
+        // 模拟加塞：此时在redis客户端运行：set balance 5
+        System.out.println("网络恢复.");
 
         balance = Integer.parseInt(jedis.get("balance"));
-        if (balance < amtToSubtract) {
+        if (balance < cost) {
             jedis.unwatch();
-            System.out.println("modify");
+            System.out.println("余额不足.");
             return false;
         } else {
-            System.out.println("********************transaction*******************");
+            System.out.println("********************开启事务.*******************");
             Transaction transaction = jedis.multi();
-            transaction.decrBy("balance", amtToSubtract);
-            transaction.incrBy("debt", amtToSubtract);
+            transaction.decrBy("balance", cost);
+            transaction.incrBy("debt", cost);
             List<Object> exec = transaction.exec();
             if (exec == null) {
                 System.out.println("发生了加塞操作，回滚事务.");
@@ -46,8 +49,8 @@ public class TestTx {
             balance = Integer.parseInt(jedis.get("balance"));
             debt = Integer.parseInt(jedis.get("debt"));
 
-            System.out.println("balance：" + balance);
-            System.out.println("debt：" + debt);
+            System.out.println("当前余额：" + balance + ".");
+            System.out.println("负债：" + debt + ".");
             return true;
         }
     }
@@ -59,8 +62,8 @@ public class TestTx {
      * 如果在此期间键balance被其它人修改， 那在提交事务（执行exec）时就会报错， 程序中通常可以捕获这类错误再重新执行一次，直到成功。
      */
     public static void main(String[] args) throws InterruptedException {
-        TestTx test = new TestTx();
-        boolean retValue = test.transMethod();
-        System.out.println("main retValue-------: " + retValue);
+        TestTransaction test = new TestTransaction();
+        boolean result = test.transMethod();
+        System.out.println("回调结果: " + result + ".");
     }
 }

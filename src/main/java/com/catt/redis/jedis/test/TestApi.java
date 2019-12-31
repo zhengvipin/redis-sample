@@ -11,7 +11,7 @@ import java.util.Set;
  * @author zwp
  * @since 2019-12-29 12:57
  */
-public class TestAPI {
+public class TestApi {
     public static void main(String[] args) {
         Jedis jedis = new Jedis("192.168.211.211", 6379);
 
@@ -36,7 +36,7 @@ public class TestAPI {
         System.out.println(set1);
 
         System.out.println("********************Hash*****************");
-        Map<String, String> hash = new HashMap<>();
+        Map<String, String> hash = new HashMap<>(3);
         hash.put("id", "9527");
         hash.put("name", "zxx");
         hash.put("age", "27");

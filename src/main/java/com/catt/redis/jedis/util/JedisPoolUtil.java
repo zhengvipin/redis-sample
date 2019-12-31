@@ -4,6 +4,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
+ * 线程池工具类
  * 单例模式（双重加锁机制）：
  * 1.类构造器私有
  * 2.持有自己类型的属性
